@@ -70,18 +70,23 @@ class PollyAudioLibrary(object):
 class PollyNode(object):
 
     def __init__(self):
+        ## Get ROS Params
+        # debug flag
+        self._no_audio_flag = rospy.get_param('no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
+
         self._polly = boto3.client('polly', region_name='us-east-1')
-        #Start the action lib server
+        #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)
-        self._speak_server.start()
         
         self._play_client = SoundClient(blocking=True)
 
         #start the library
         self._audio_lib = PollyAudioLibrary()
-        # debug flag
-        self._no_audio_flag = rospy.get_param('no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
+
+        #start actuin server 
+        self._speak_server.start()
+
         rospy.loginfo("PollyNode ready")
 
     def _synthesize_speech(self, text, voice_id):
