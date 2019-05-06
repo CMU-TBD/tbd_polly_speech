@@ -102,7 +102,6 @@ class PollyNode(object):
         self._speak_server.start()
 
         rospy.loginfo("PollyNode ready")
-        rospy.logdebug("PollyNode ready")
 
     def _synthesize_speech(self, text, voice_id):
         #Call Amazon Poly and try to generate the speech
