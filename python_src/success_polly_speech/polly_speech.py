@@ -12,7 +12,7 @@ class PollySpeech(object):
         self._polly_client = actionlib.SimpleActionClient("success_polly_speech/speak", pollySpeechAction)
         self._polly_client.wait_for_server()
 
-    def speak(self, text, block=True, cancel=False, voice_id="Joanna", **kwargs):
+    def speak(self, text, block=True, cancel=False, voice_id="Joanna",delay=0.5,**kwargs):
         """
         Command the robot to speak the given text.
 
@@ -24,6 +24,8 @@ class PollySpeech(object):
             Name of desired voice from AWS Polly Speech
         block : bool, optional
             Whether this call is a blocking call.
+        delay : float, optional, 0.25
+            Sometimes the speech are too quick and we want it have a slight delay after speaking
         cancel : bool, optional
             Whether to cancel all the current speech request to say this instead of 
             queue it
@@ -34,8 +36,10 @@ class PollySpeech(object):
 
         if cancel:
             self._polly_client.cancel_all_goals()
+            rospy.logdebug('cancelling all goals of polly server')
         if block:
             self._polly_client.send_goal_and_wait(goal)
+            rospy.sleep(delay)
         else:
             self._polly_client.send_goal(goal)
 
@@ -72,13 +76,11 @@ import rospy
 def main():
     rospy.init_node('polly_test')
     ps = PollySpeech()
-    ps.speak("I am a scary robot",voice_id='Joanna')
-    ps.speak("I am not a scary robot",voice_id='Joanna', block=False)
-    ps.wait()
-    ps.speak('Hello World. I will be interrupted',voice_id='Emma', block=False, cancel=True)
-    rospy.sleep(0.5)
-    ps.stopAll()
-    rospy.sleep(5)
+    for i in range(0,100):
+        ps.speak("I am a scary robot",voice_id='Joanna',block=False)
+        ps.wait()
+        print(i)
+    #rospy.sleep(5)
 
 if __name__ == '__main__':
     main()
