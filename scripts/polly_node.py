@@ -16,7 +16,6 @@ import rospkg
 import os
 from masterfile import Item, HashTable
 import wave
-from sound_play.libsoundplay import SoundClient
 
 
 class PollyAudioLibrary(object):
@@ -72,22 +71,38 @@ class PollyNode(object):
     def __init__(self):
         ## Get ROS Params
         # debug flag
-        self._no_audio_flag = rospy.get_param('no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
-
+        self._no_audio_flag = rospy.get_param('~no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
+        self._no_break_flag = rospy.get_param('~no_break_if_no_audio', False)
+        self._play_type = rospy.get_param('~output','arml_audio_common')
+        
         self._polly = boto3.client('polly', region_name='us-east-1')
         #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)
         
-        self._play_client = SoundClient(blocking=True)
+        if self._play_type == 'arml_audio_common':
+            #get the message and start action server
+            from arml_ros_msgs.msg import (
+                playAudioAction,
+                playAudioGoal
+            )
+            self._arml_audio_client = actionlib.SimpleActionClient("playAudio", playAudioAction)
+            self._arml_imported_playAudioGoal = playAudioGoal
+            self._arml_audio_client.wait_for_server()
+
+        elif self._play_type == 'sound_play':
+            #import the clients and initialize it 
+            from sound_play.libsoundplay import SoundClient_play_client
+            self._sound_play_client = SoundClient(blocking=True)
 
         #start the library
         self._audio_lib = PollyAudioLibrary()
 
-        #start actuin server 
+        #start action server 
         self._speak_server.start()
 
         rospy.loginfo("PollyNode ready")
+        rospy.logdebug("PollyNode ready")
 
     def _synthesize_speech(self, text, voice_id):
         #Call Amazon Poly and try to generate the speech
@@ -111,7 +126,12 @@ class PollyNode(object):
 
 
     def _preempt_callback(self):
-        self._play_client.stopAll()
+        if self._play_type == 'arml_audio_common':
+            #check if audio is running
+            if self._arml_audio_client.get_state() == actionlib.SimpleGoalState.ACTIVE:
+                self._arml_audio_client.cancel_goal()
+        elif self._play_type == 'sound_play':
+            self._sound_play_client.stopAll()
 
     def _speak_callback(self, goal):
 
@@ -119,6 +139,10 @@ class PollyNode(object):
         rospy.loginfo('POLLY_SPEAK:{}'.format(goal.text))
         if not self._no_audio_flag:
             complete = self.speak(goal)
+        elif not self._no_break_flag:
+            num_of_words = len(goal.text.split(' '))
+            duration = num_of_words * 0.4 #estimate 150 words per minute
+            rospy.sleep(duration)
         result = pollySpeechResult()
         result.complete = complete
         #check if speak failed because it is being preempted
@@ -155,7 +179,25 @@ class PollyNode(object):
                 raise RuntimeError
         
         #play the wave file
-        self._play_client.playWave(wav_path)
+        rospy.logdebug("POLLYSPEAK:playing wave file")
+        if self._play_type == 'arml_audio_common':
+            #get the wave file
+            waveFile = wave.open(wav_path)
+            num_of_frames = waveFile.getnframes() * waveFile.getsampwidth()
+            #generate goal
+            goal = self._arml_imported_playAudioGoal()
+            goal.soundFile = waveFile.readframes(num_of_frames)
+            goal.rate = int(waveFile.getframerate())
+            goal.size = num_of_frames
+            #send to the goal server
+            self._arml_audio_client.send_goal_and_wait(goal)
+
+        elif self._play_type == 'sound_play':
+            self._sound_play_client.playWave(wav_path)
+        else:
+            rospy.logwarn("unknown sound playing module {} in polly_speech".format(self._play_type))
+        rospy.logdebug("POLLYSPEAK:playing wave file completed")
+
         #check whether we were pre-empted
         if self._speak_server.is_preempt_requested():
             return False
@@ -163,6 +205,6 @@ class PollyNode(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node("polly_node")
+    rospy.init_node("polly_node", log_level=rospy.DEBUG)
     pl = PollyNode()
     rospy.spin()

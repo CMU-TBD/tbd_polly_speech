@@ -19,17 +19,11 @@ def main():
     rospy.loginfo('found server')
     speak(polly_client, "Lalalalalalalalalalalalalalalalala.", "Matthew")
     polly_client.wait_for_result()
-    speak(polly_client, "<speak>This is a XML sentence</speak>", "Matthew")
-    polly_client.wait_for_result()
-    speak(polly_client, "I will be interrupted. Hello", "Emma")
-    rospy.sleep(1)
-    polly_client.cancel_goal()
-    polly_client.wait_for_result()
-    print(polly_client.get_result())
     rospy.sleep(1)
     speak(polly_client, "This is a very long sentence that I will not be saying anymore. I will need a lot of data to store this sentence.", "Matthew")
     polly_client.wait_for_result()
     rospy.sleep(5)
+
 
 if __name__ == '__main__':
     rospy.init_node("polly_node_test")
