@@ -76,11 +76,13 @@ import rospy
 def main():
     rospy.init_node('polly_test')
     ps = PollySpeech()
-    for i in range(0,100):
-        ps.speak("I am a scary robot",voice_id='Joanna',block=False)
-        ps.wait()
-        print(i)
-    #rospy.sleep(5)
-
+    ps.speak("I am a scary robot",voice_id='Joanna')
+    ps.speak("I am not a scary robot",voice_id='Joanna', block=False)
+    ps.wait()
+    ps.speak('Hello World. I will be interrupted',voice_id='Emma', block=False, cancel=True)
+    rospy.sleep(0.5)
+    ps.stopAll()
+    rospy.sleep(5)
+    
 if __name__ == '__main__':
     main()
