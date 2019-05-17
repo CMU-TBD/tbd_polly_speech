@@ -154,6 +154,9 @@ class PollyNode(object):
 
     def speak(self, goal):
 
+        #sanitize the incoming text
+        goal.text = goal.text.strip() 
+
         data = None
 
         # try finding the text in the local stored library
