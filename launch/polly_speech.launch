@@ -2,17 +2,18 @@
 
     <arg name='polly_audio_storage_path' default="$(find success_polly_speech)/audio_storage"/>
     <arg name='no_audio' default="false"/>
-	<arg name='play_type' default='arml_audio_common' />
+	<arg name='play_type' default='sound_play' />
 	
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find success_polly_speech)/config/rosconsole.config" />
 
 	<group ns='success_polly_speech'>
 
 		<node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" if="$(eval play_type == 'sound_play')" />
-		<node name="arml_audio_common_node" pkg="arml_audio_common" type="audio_node" output="screen" if="$(eval play_type == 'arml_audio_common')" />
+		<include file="$(find tbd_audio_common)/launch/audio_node.launch" if="$(eval play_type == 'tbd_audio_common')" />
 
 		<node pkg="success_polly_speech" name="polly_node" type="polly_node.py" output='screen'>
 			<param name="no_audio" type="bool" value="$(arg no_audio)" />
+			<param name="output" type="string" value="$(arg play_type)" />
 			<param name="polly_audio_storage_path" type="string" value='$(arg polly_audio_storage_path)' />
 		</node>
 	</group>

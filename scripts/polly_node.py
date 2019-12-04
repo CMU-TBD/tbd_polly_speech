@@ -73,26 +73,25 @@ class PollyNode(object):
         # debug flag
         self._no_audio_flag = rospy.get_param('~no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
         self._no_break_flag = rospy.get_param('~no_break_if_no_audio', False)
-        self._play_type = rospy.get_param('~output','arml_audio_common')
+        self._play_type = rospy.get_param('~output', 'sound_play')
         
         self._polly = boto3.client('polly', region_name='us-east-1')
         #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)
-        
-        if self._play_type == 'arml_audio_common':
+        if self._play_type == 'tbd_audio_common':
             #get the message and start action server
-            from arml_ros_msgs.msg import (
+            from tbd_ros_msgs.msg import (
                 playAudioAction,
                 playAudioGoal
             )
-            self._arml_audio_client = actionlib.SimpleActionClient("playAudio", playAudioAction)
-            self._arml_imported_playAudioGoal = playAudioGoal
-            self._arml_audio_client.wait_for_server()
+            self._tbd_audio_client = actionlib.SimpleActionClient("playAudio", playAudioAction)
+            self._tbd_imported_playAudioGoal = playAudioGoal
+            self._tbd_audio_client.wait_for_server()
 
         elif self._play_type == 'sound_play':
             #import the clients and initialize it 
-            from sound_play.libsoundplay import SoundClient_play_client
+            from sound_play.libsoundplay import SoundClient
             self._sound_play_client = SoundClient(blocking=True)
 
         #start the library
@@ -125,10 +124,10 @@ class PollyNode(object):
 
 
     def _preempt_callback(self):
-        if self._play_type == 'arml_audio_common':
+        if self._play_type == 'tbd_audio_common':
             #check if audio is running
-            if self._arml_audio_client.get_state() == actionlib.SimpleGoalState.ACTIVE:
-                self._arml_audio_client.cancel_goal()
+            if self._tbd_audio_client.get_state() == actionlib.SimpleGoalState.ACTIVE:
+                self._tbd_audio_client.cancel_goal()
         elif self._play_type == 'sound_play':
             self._sound_play_client.stopAll()
 
@@ -182,17 +181,17 @@ class PollyNode(object):
         
         #play the wave file
         rospy.logdebug("POLLYSPEAK:playing wave file")
-        if self._play_type == 'arml_audio_common':
+        if self._play_type == 'tbd_audio_common':
             #get the wave file
             waveFile = wave.open(wav_path)
             num_of_frames = waveFile.getnframes() * waveFile.getsampwidth()
             #generate goal
-            goal = self._arml_imported_playAudioGoal()
+            goal = self._tbd_imported_playAudioGoal()
             goal.soundFile = waveFile.readframes(num_of_frames)
             goal.rate = int(waveFile.getframerate())
             goal.size = num_of_frames
             #send to the goal server
-            self._arml_audio_client.send_goal_and_wait(goal)
+            self._tbd_audio_client.send_goal_and_wait(goal)
 
         elif self._play_type == 'sound_play':
             self._sound_play_client.playWave(wav_path)
