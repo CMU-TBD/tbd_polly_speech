@@ -1,1 +1,1 @@
-from polly_speech import *
+from .polly_speech import *

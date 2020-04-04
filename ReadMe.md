@@ -1,4 +1,4 @@
-# success_polly_speech
+# tbd_polly_speech
 License - MIT  
 Maintainer - zhi.tan@ri.cmu.edu  
 
@@ -6,7 +6,7 @@ A ROS wrapper for Amazon Polly Text-to-Speech service. We also cache locally eac
 
 ## Dependencies
 ### ROS Packages:
-* success_ros_msgs (https://github.com/SUCCESS-MURI/success_ros_msgs)
+* tbd_ros_msgs (https://github.com/CMU-TBD/tbd_ros_msgs)
 * sound_play (http://wiki.ros.org/sound_play)
 * IF uses `tbd_audio_common` play type:
     * tbd_ros_msgs (https://github.com/CMU-TBD/tbd_ros_msgs)
@@ -20,7 +20,7 @@ A ROS wrapper for Amazon Polly Text-to-Speech service. We also cache locally eac
 1. Make sure you have a AWS credentials file setup on the system. [Guide by AWS](https://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html). Make sure the account has AWS Polly Speech Enabled
 2. launch the backend services
 ```
-roslaunch success_polly_speech polly_speech.launch
+roslaunch tbd_polly_speech polly_speech.launch
 ```
 3. You can access the service either through the Python API
 ```
@@ -34,7 +34,7 @@ ps.wait()
 ps.speak('Hello World. I will be interrupted',voice_id='Emma', block=False, cancel=True) 
 ps.stopAll() #Interrupts the sentence and stop the voice command
 ```
-OR directly calling the action server at the topic `success_polly_speech/speak` with the action `pollySpeechAction`.
+OR directly calling the action server at the topic `tbd_polly_speech/speak` with the action `pollySpeechAction`.
 
 ### ROS Parameters
 There are three ROS parameters in the launch file
@@ -47,6 +47,9 @@ There are three ROS parameters in the launch file
 A list of voice ID can be found here: https://docs.aws.amazon.com/polly/latest/dg/voicelist.html
 
 ## Change logs:
+* 4/4/2020:
+    * moved a cloned fork back to `cmu-tbd`. Changed source of action definition to `tbd_ros_msgs`
+    * Fixed python2 bugs (invalid writing, etc)
 * 12/4/2019
     * change the default output/play_type to be `sound_play`
     * fixed a bug where `sound_play` will never be used if start through launch file

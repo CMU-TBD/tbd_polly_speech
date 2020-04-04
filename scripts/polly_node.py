@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from success_ros_msgs.msg import (
+from tbd_ros_msgs.msg import (
     pollySpeechAction,
     pollySpeechGoal,
     pollySpeechResult
@@ -26,7 +26,7 @@ class PollyAudioLibrary(object):
         #check if the user defined where the audio should be stored accoring to ROSParam, if not, default to package root
         rospack = rospkg.RosPack()
         rospy.loginfo('polly node\' namespace:{}'.format(rospy.get_namespace()))
-        self._lib_directory = rospy.get_param("polly_node/polly_audio_storage_path", os.path.join(rospack.get_path('success_polly_speech'), 'audio_storage'))
+        self._lib_directory = rospy.get_param("polly_node/polly_audio_storage_path", os.path.join(rospack.get_path('tbd_polly_speech'), 'audio_storage'))
         rospy.loginfo('polly_speech will store audio at:{}'.format(self._lib_directory))
         #make directory if not exist
         if not os.path.exists(self._lib_directory):

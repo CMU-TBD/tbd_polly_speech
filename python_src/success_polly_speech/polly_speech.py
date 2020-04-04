@@ -9,7 +9,7 @@ from success_ros_msgs.msg import(
 class PollySpeech(object):
 
     def __init__(self):
-        self._polly_client = actionlib.SimpleActionClient("success_polly_speech/speak", pollySpeechAction)
+        self._polly_client = actionlib.SimpleActionClient("tbd_polly_speech/speak", pollySpeechAction)
         self._polly_client.wait_for_server()
 
     def speak(self, text, block=True, cancel=False, voice_id="Joanna",delay=0.5,**kwargs):

@@ -52,20 +52,20 @@ class HashTable:
         if not os.path.isfile(self.directory):
             new = open(self.directory, 'w+')
         
-        with open(self.directory, 'rw+') as f:
+        with open(self.directory, 'w+') as f:
             lines = f.readlines()
             x = f.tell()
             for line in lines:
                 
                 # edge case with empty file
                 if line == '\n' and len(lines) == 1:
-                    f = open(self.directory, 'rw+')
+                    f = open(self.directory, 'w+')
                     f.write("(%s, %s): %i.wav\n" % (item.speaker, item.text, hash))
                     f.close()
                     return
                 # remove extra whitespace
                 elif line == '\n':
-                    f = open(directory, 'rw+')
+                    f = open(directory, 'w+')
                     f.truncate()
                     return
                 
@@ -84,7 +84,7 @@ class HashTable:
                 f.close()
         
         # write line if not a duplicate
-        f = open(self.directory, 'rw+')
+        f = open(self.directory, 'w+')
         f.seek(x)
         f.write("(%s, %s): %i.wav\n" % (item.speaker, item.text, hash))
         f.truncate()
@@ -94,7 +94,7 @@ class HashTable:
     def find(self, item):
         hash = self.hashing(item) 
         if os.path.exists(self.directory):
-            with open(self.directory, 'rw+') as f:
+            with open(self.directory, 'w+') as f:
                 lines = f.readlines()
 
                 # compare keys and return hash if valid
