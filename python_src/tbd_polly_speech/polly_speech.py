@@ -1,4 +1,5 @@
 
+
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from success_ros_msgs.msg import(
@@ -63,12 +64,18 @@ class PollySpeech(object):
         duration : rospy.Duration
             Ros's implementation of Duration
 
+        Returns
+        ---------
+        bool
+            False if the wait timed out, True otherwise
+
         """
+        # check the poll
         if self._polly_client.gh:
             if duration is not None:
-                result = self._polly_client.wait_for_result(duration)
+                return self._polly_client.wait_for_result(duration)
             else:
-                result = self._polly_client.wait_for_result()
+                return self._polly_client.wait_for_result()
 
 
 import rospy
