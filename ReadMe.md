@@ -46,17 +46,7 @@ There are three ROS parameters in the launch file
 ### Voices
 A list of voice ID can be found here: https://docs.aws.amazon.com/polly/latest/dg/voicelist.html
 
-## Change logs:
-* 4/6/2020:
-    * Fixed where we forgot to change the python_src name to `tbd`
-    * Exposed whether the `pollyspeech.wait` method timed out or not
-* 4/4/2020:
-    * moved a cloned fork back to `cmu-tbd`. Changed source of action definition to `tbd_ros_msgs`
-    * Fixed python2 bugs (invalid writing, etc)
-* 12/4/2019
-    * change the default output/play_type to be `sound_play`
-    * fixed a bug where `sound_play` will never be used if start through launch file
-    * Imporved documentation.
+## [Change logs](CHANGELOG.md)
 
 ## Past Contributors
 - Joe Connolly - 07/2018

@@ -2,15 +2,21 @@
 
 import actionlib
 from actionlib_msgs.msg import GoalStatus
-from success_ros_msgs.msg import(
+from tbd_ros_msgs.msg import(
     pollySpeechGoal,
     pollySpeechAction
 )
+import os
 
 class PollySpeech(object):
 
-    def __init__(self):
-        self._polly_client = actionlib.SimpleActionClient("tbd_polly_speech/speak", pollySpeechAction)
+    def __init__(self, topic_prefix=""):
+
+        topic_name = "speak"
+        if topic_prefix != "":
+            topic_name = os.path.join(topic_prefix, topic_name)
+
+        self._polly_client = actionlib.SimpleActionClient(topic_name, pollySpeechAction)
         self._polly_client.wait_for_server()
 
     def speak(self, text, block=True, cancel=False, voice_id="Joanna",delay=0.5,**kwargs):

@@ -4,17 +4,15 @@
     <arg name='no_audio' default="false"/>
 	<arg name='play_type' default='tbd_audio_common' />
 	
-    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find tbd_polly_speech)/config/rosconsole.config" />
+    <!-- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find tbd_polly_speech)/config/rosconsole.config" /> -->
 
-	<group ns='tbd_polly_speech'>
+    <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" if="$(eval play_type == 'sound_play')" />
+    <include file="$(find tbd_audio_common)/launch/audio_node.launch" if="$(eval play_type == 'tbd_audio_common')" />
 
-		<node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" if="$(eval play_type == 'sound_play')" />
-		<include file="$(find tbd_audio_common)/launch/audio_node.launch" if="$(eval play_type == 'tbd_audio_common')" />
+    <node pkg="tbd_polly_speech" name="polly_node" type="polly_node.py" output='screen'>
+        <param name="no_audio" type="bool" value="$(arg no_audio)" />
+        <param name="output" type="string" value="$(arg play_type)" />
+        <param name="polly_audio_storage_path" type="string" value='$(arg polly_audio_storage_path)' />
+    </node>
 
-		<node pkg="tbd_polly_speech" name="polly_node" type="polly_node.py" output='screen'>
-			<param name="no_audio" type="bool" value="$(arg no_audio)" />
-			<param name="output" type="string" value="$(arg play_type)" />
-			<param name="polly_audio_storage_path" type="string" value='$(arg polly_audio_storage_path)' />
-		</node>
-	</group>
 </launch>
