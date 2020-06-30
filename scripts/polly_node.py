@@ -79,7 +79,7 @@ class PollyNode(object):
         self._polly = boto3.client('polly', region_name='us-east-1')
         self.is_speaking = False
         self.pub = rospy.Publisher("polly_speaking", Bool, queue_size = 10)
-        self.timer = rospy.Timer(rospy.Duration(0.5), self.timer_callback)
+        self.timer = rospy.Timer(rospy.Duration(0.05), self.timer_callback)
         #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)
@@ -134,6 +134,7 @@ class PollyNode(object):
 
 
     def _preempt_callback(self):
+        self.is_speaking = False
         if self._play_type == 'tbd_audio_common':
             #check if audio is running
             if self._tbd_audio_client.get_state() == actionlib.SimpleGoalState.ACTIVE:
@@ -149,6 +150,7 @@ class PollyNode(object):
         rospy.loginfo('POLLY_SPEAK:{}'.format(goal.text))
         if not self._no_audio_flag:
             complete = self.speak(goal)
+            self.is_speaking = False
         elif not self._no_break_flag:
             self.is_speaking = False
             num_of_words = len(goal.text.split(' '))
@@ -156,6 +158,7 @@ class PollyNode(object):
             rospy.sleep(duration)
         result = pollySpeechResult()
         result.complete = complete
+        self.is_speaking = False
         #check if speak failed because it is being preempted
         if not complete and self._speak_server.is_preempt_requested():
             rospy.loginfo('set aborted')
@@ -209,15 +212,18 @@ class PollyNode(object):
             goal.size = num_of_frames
             #send to the goal server
             self._tbd_audio_client.send_goal_and_wait(goal)
+            self.is_speaking = False
 
         elif self._play_type == 'sound_play':
             self.is_speaking = True
             self._sound_play_client.playWave(wav_path)
+            self.is_speaking = False
         else:
             self.is_speaking = True
             rospy.logwarn("unknown sound playing module {} in polly_speech".format(self._play_type))
+            self.is_speaking = False
         rospy.logdebug("POLLYSPEAK:playing wave file completed")
-
+        self.is_speaking = False
         #check whether we were pre-empted
         if self._speak_server.is_preempt_requested():
             self.is_speaking = False
