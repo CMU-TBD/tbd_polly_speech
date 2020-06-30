@@ -7,6 +7,7 @@ from tbd_ros_msgs.msg import(
 )
 import actionlib
 
+
 def speak(polly_client, text, voice_id="Joanna"):
     goal = pollySpeechGoal()
     goal.text = text
@@ -14,8 +15,11 @@ def speak(polly_client, text, voice_id="Joanna"):
     polly_client.send_goal(goal)
 
 def main():
-    polly_client = actionlib.SimpleActionClient("tbd_polly_speech/speak", pollySpeechAction)
+    rospy.loginfo("start")
+    polly_client = actionlib.SimpleActionClient("speak", pollySpeechAction)
+    rospy.loginfo("start")
     polly_client.wait_for_server()
+    rospy.loginfo("start")
     rospy.loginfo('found server')
     speak(polly_client, "Lalalalalalalalalalalalalalalalala.", "Matthew")
     polly_client.wait_for_result()
@@ -33,4 +37,6 @@ def main():
 
 if __name__ == '__main__':
     rospy.init_node("polly_node_test")
+    rospy.loginfo("start")
     main()
+    

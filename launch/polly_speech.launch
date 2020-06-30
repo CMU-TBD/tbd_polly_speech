@@ -2,7 +2,7 @@
 
     <arg name='polly_audio_storage_path' default="$(find tbd_polly_speech)/audio_storage"/>
     <arg name='no_audio' default="false"/>
-	<arg name='play_type' default='tbd_audio_common' />
+	<arg name='play_type' default='sound_play' />
 	
     <!-- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find tbd_polly_speech)/config/rosconsole.config" /> -->
 

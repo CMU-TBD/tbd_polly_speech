@@ -6,7 +6,7 @@ from tbd_ros_msgs.msg import (
     pollySpeechGoal,
     pollySpeechResult
 )
-
+from std_msgs.msg import Bool
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 import actionlib
@@ -69,6 +69,7 @@ class PollyAudioLibrary(object):
 class PollyNode(object):
 
     def __init__(self):
+        
         ## Get ROS Params
         # debug flag
         self._no_audio_flag = rospy.get_param('~no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
@@ -76,6 +77,9 @@ class PollyNode(object):
         self._play_type = rospy.get_param('~output', 'sound_play')
         
         self._polly = boto3.client('polly', region_name='us-east-1')
+        self.is_speaking = False
+        self.pub = rospy.Publisher("polly_speaking", Bool, queue_size = 10)
+        self.timer = rospy.Timer(rospy.Duration(0.5), self.timer_callback)
         #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)
@@ -102,8 +106,14 @@ class PollyNode(object):
 
         rospy.loginfo("PollyNode ready")
 
+    def timer_callback(self, event):
+        """Function that will continuosly publish status
+        """
+        self.pub.publish(self.is_speaking)
+
     def _synthesize_speech(self, text, voice_id):
         #Call Amazon Poly and try to generate the speech
+        self.is_speaking = False
         try:
             if text.startswith('<speak>'):
                 response = self._polly.synthesize_speech(Text=text, OutputFormat='pcm', VoiceId=voice_id, TextType='ssml')
@@ -128,16 +138,19 @@ class PollyNode(object):
             #check if audio is running
             if self._tbd_audio_client.get_state() == actionlib.SimpleGoalState.ACTIVE:
                 self._tbd_audio_client.cancel_goal()
+                self.is_speaking = False
         elif self._play_type == 'sound_play':
             self._sound_play_client.stopAll()
+            self.is_speaking = False
 
     def _speak_callback(self, goal):
-
+        self.is_speaking = False
         complete = True
         rospy.loginfo('POLLY_SPEAK:{}'.format(goal.text))
         if not self._no_audio_flag:
             complete = self.speak(goal)
         elif not self._no_break_flag:
+            self.is_speaking = False
             num_of_words = len(goal.text.split(' '))
             duration = num_of_words * 0.4 #estimate 150 words per minute
             rospy.sleep(duration)
@@ -152,7 +165,7 @@ class PollyNode(object):
 
 
     def speak(self, goal):
-
+        self.is_speaking = True
         #sanitize the incoming text
         goal.text = goal.text.strip() 
 
@@ -166,22 +179,26 @@ class PollyNode(object):
             rospy.loginfo("synthesizing speech with AWS")
             data = self._synthesize_speech(goal.text, goal.voice_id)
             if data is None :
+                self.is_speaking = False
                 #this means that for some reason it wasn't able to generate the speech
                 #return failure
                 return False
             #check if server is preempted
             if self._speak_server.is_preempt_requested():
+                self.is_speaking = False
                 return False
 
             #save the data into a wav file
             wav_path = self._audio_lib.save_text(goal.text, goal.voice_id, data)
             if wav_path is None:
+                self.is_speaking = False
                 #this probably means there is a conflict, which is nearly impossible
                 raise RuntimeError
         
         #play the wave file
         rospy.logdebug("POLLYSPEAK:playing wave file")
         if self._play_type == 'tbd_audio_common':
+            self.is_speaking = True
             #get the wave file
             waveFile = wave.open(wav_path)
             num_of_frames = waveFile.getnframes() * waveFile.getsampwidth()
@@ -194,14 +211,18 @@ class PollyNode(object):
             self._tbd_audio_client.send_goal_and_wait(goal)
 
         elif self._play_type == 'sound_play':
+            self.is_speaking = True
             self._sound_play_client.playWave(wav_path)
         else:
+            self.is_speaking = True
             rospy.logwarn("unknown sound playing module {} in polly_speech".format(self._play_type))
         rospy.logdebug("POLLYSPEAK:playing wave file completed")
 
         #check whether we were pre-empted
         if self._speak_server.is_preempt_requested():
+            self.is_speaking = False
             return False
+        self.is_speaking = False
         return True
 
 
