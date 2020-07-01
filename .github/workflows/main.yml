@@ -27,9 +27,6 @@ jobs:
         uses: ros-tooling/setup-ros@0.0.20
         with: 
           required-ros-distributions: ${{ matrix.ros_distributions }}
-      - name: Install ROS dependencies
-        run: |
-          pip install empy pyyaml rospkg
       - name: Create Workspace
         run: "mkdir -p ros_ws/src"  
       - uses: actions/checkout@v2
@@ -46,13 +43,13 @@ jobs:
           rosdep install -i --from-paths ros_ws/src
       - name: Install Python3 Compoents
         run: |
-          apt-get install python3-venv
+          sudo apt-get install python3-venv
           python3 -m venv venv
           source venv/bin/activate
           pip install empy rospkg defusedxml
       - name: Install Catkin Tools
         run: |
-          apt-get install python-catkin-tools
+          sudo apt-get install python-catkin-tools
       - name: Catkin Build
         run: |
           source /opt/ros/${{matrix.ros_distributions}}/setup.bash
