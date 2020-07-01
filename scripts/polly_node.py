@@ -75,11 +75,13 @@ class PollyNode(object):
         self._no_audio_flag = rospy.get_param('~no_audio', False) #whether to skip the generation, useful when debugging and don't want to spend money on amazon
         self._no_break_flag = rospy.get_param('~no_break_if_no_audio', False)
         self._play_type = rospy.get_param('~output', 'sound_play')
+        self._speak_signal_rate = rospy.get_param("~speak_signal_hz", 20)
         
         self._polly = boto3.client('polly', region_name='us-east-1')
+        # speak signal publisher
         self.is_speaking = False
-        self.pub = rospy.Publisher("polly_speaking", Bool, queue_size = 10)
-        self.timer = rospy.Timer(rospy.Duration(0.05), self.timer_callback)
+        self.pub = rospy.Publisher("speak_signal", Bool, queue_size = 10)
+        self.timer = rospy.Timer(rospy.Duration(1/self._speak_signal_rate), self.timer_callback)
         #setup the action lib server
         self._speak_server = actionlib.SimpleActionServer("speak", pollySpeechAction, self._speak_callback, auto_start=False)
         self._speak_server.register_preempt_callback(self._preempt_callback)

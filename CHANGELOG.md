@@ -1,6 +1,11 @@
 
 # Changelog
 
+## [1.1.3] - 2020-07-01
+#### Added
+- CI Test that checks the interfaces
+- `speak_signal` that sends a `std_msgs/Bool` at 20Hz to signal whether the robot is speaking or not.
+
 ## [1.1.2]
 #### Changed
 - Removed the namespace tag, let programs decide what ns to put the code in.

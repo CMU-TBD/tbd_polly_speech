@@ -20,9 +20,6 @@ class PollySpeech(object):
         self._polly_client.wait_for_server()
         
 
-
-    
-
     def speak(self, text, block=True, cancel=False, voice_id="Joanna",delay=0.5,**kwargs):
         """
         Command the robot to speak the given text.
