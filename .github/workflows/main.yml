@@ -58,7 +58,9 @@ jobs:
           catkin build -DPYTHON_VERSION=3
       - name: Catkin Test
         run: |
+          source venv/bin/activate
           cd ros_ws
+          source devel/setup.bash
           catkin run_tests -DPYTHON_VERSION=3
           catkin_test_results
 
