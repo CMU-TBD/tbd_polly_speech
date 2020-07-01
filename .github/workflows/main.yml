@@ -1,0 +1,67 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Building & Testing
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+      matrix:
+        ros_distributions: 
+          - melodic
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@0.0.20
+        with: 
+          required-ros-distributions: ${{ matrix.ros_distributions }}
+      - name: Install ROS dependencies
+        run: |
+          pip install empy pyyaml rospkg
+      - name: Create Workspace
+        run: "mkdir -p ros_ws/src"  
+      - uses: actions/checkout@v2
+        with:
+          path: ros_ws/src/tbd_polly_speech
+      - uses: actions/checkout@v2
+        with:
+          repository: cmu-tbd/tbd_ros_msgs
+          path: ros_ws/src/tbd_ros_msgs
+      - name: Install Dependencies
+        run: |
+          source /opt/ros/${{matrix.ros_distributions}}/setup.bash
+          rosdep update
+          rosdep install -i --from-paths ros_ws/src
+      - name: Install Python3 Compoents
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install empy rospkg defusedxml
+      - name: Install Catkin Tools
+        run: |
+          apt install python-catkin-tools
+      - name: Catkin Build
+        run: |
+          source /opt/ros/${{matrix.ros_distributions}}/setup.bash
+          source venv/bin/activate
+          cd ros_ws
+          catkin build -DPYTHON_VERSION=3
+      - name: Catkin Test
+        run: |
+          cd ros_ws
+          catkin run_tests -DPYTHON_VERSION=3
+          catkin_test_results
+
+      
