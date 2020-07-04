@@ -58,8 +58,7 @@ jobs:
           source venv/bin/activate
           cd ros_ws
           source devel/setup.bash
-          cd src/tbd_polly_speech
-          catkin_make run_tests -DPYTHON_VERSION=3 --this
+          catkin_make run_tests -DPYTHON_VERSION=3
       - name: Check Catkin Result
         run: |
           cd ros_ws
