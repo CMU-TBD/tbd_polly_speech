@@ -23,10 +23,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Setup ROS
-        uses: ros-tooling/setup-ros@0.0.20
-        with: 
-          required-ros-distributions: ${{ matrix.ros_distributions }}
+      #- name: Setup ROS
+        #uses: ros-tooling/setup-ros@0.0.20
+        #with: 
+        #  required-ros-distributions: ${{ matrix.ros_distributions }}
       - name: Create Workspace
         run: "mkdir -p ros_ws/src"  
       - uses: actions/checkout@v2
@@ -36,11 +36,11 @@ jobs:
         with:
           repository: cmu-tbd/tbd_ros_msgs
           path: ros_ws/src/tbd_ros_msgs
-      - name: Install Dependencies
-        run: |
-          source /opt/ros/${{matrix.ros_distributions}}/setup.bash
-          rosdep update
-          rosdep install -i --from-paths ros_ws/src
+      #- name: Install Dependencies
+        #run: |
+         # source /opt/ros/${{matrix.ros_distributions}}/setup.bash
+         # rosdep update
+         # rosdep install -i --from-paths ros_ws/src
       - name: Install Python3 Compoents
         run: |
           sudo apt-get install python3-venv
