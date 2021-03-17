@@ -1,6 +1,11 @@
 
 # Changelog
 
+## [1.2.0] - 2021-03-17
+- **[Changed]** reformatting of files
+- **[Changed]** renamed masterfile to hash_table and change it to use yaml instead of pure txt file.
+- **[Fixed]** bug where index file kept being recreated.
+
 ## [1.1.3] - 2020-07-01
 #### Added
 - CI Test that checks the interfaces

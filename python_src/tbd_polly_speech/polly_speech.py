@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from tbd_ros_msgs.msg import(
@@ -9,6 +10,7 @@ from tbd_ros_msgs.msg import(
 
 import os
 
+
 class PollySpeech(object):
 
     def __init__(self, topic_prefix=""):
@@ -16,11 +18,11 @@ class PollySpeech(object):
         if topic_prefix != "":
             topic_name = os.path.join(topic_prefix, topic_name)
 
-        self._polly_client = actionlib.SimpleActionClient(topic_name, pollySpeechAction)
+        self._polly_client = actionlib.SimpleActionClient(
+            topic_name, pollySpeechAction)
         self._polly_client.wait_for_server()
-        
 
-    def speak(self, text, block=True, cancel=False, voice_id="Joanna",delay=0.5,**kwargs):
+    def speak(self, text, block=True, cancel=False, voice_id="Joanna", delay=0.5, **kwargs):
         """
         Command the robot to speak the given text.
 
@@ -41,8 +43,7 @@ class PollySpeech(object):
         goal = pollySpeechGoal()
         goal.text = text
         goal.voice_id = voice_id
-    
-        
+
         if cancel:
             self._polly_client.cancel_all_goals()
             rospy.logdebug('cancelling all goals of polly server')
@@ -56,21 +57,19 @@ class PollySpeech(object):
         """Stop all of the current speech executing by the robot. This will also stop
         speech uterances from other programs
         """
-        
-        self._polly_client.cancel_all_goals()
 
+        self._polly_client.cancel_all_goals()
 
     def stop(self):
         """Stop the current speech that is being executed
-        """ 
-        
+        """
+
         self._polly_client.cancel_goal()
-     
 
     def wait(self, duration=None):
         """
         Wait for the speech to finish. Note, sometimes the last few seconds of the speech will still be playing when it ends
-        
+
         Parameters
         ----------
         duration : rospy.Duration
@@ -90,19 +89,19 @@ class PollySpeech(object):
                 return self._polly_client.wait_for_result()
 
 
-import rospy
-
 def main():
     rospy.init_node('polly_test')
     ps = PollySpeech()
-    
-    ps.speak("I am a scary robot",voice_id='Joanna')
-    ps.speak("I am not a scary robot",voice_id='Joanna', block=False)
+
+    ps.speak("I am a scary robot", voice_id='Joanna')
+    ps.speak("I am not a scary robot", voice_id='Joanna', block=False)
     ps.wait()
-    ps.speak('Hello World. I will be interrupted',voice_id='Emma', block=False, cancel=True)
+    ps.speak('Hello World. I will be interrupted',
+             voice_id='Emma', block=False, cancel=True)
     rospy.sleep(0.5)
     ps.stopAll()
     rospy.sleep(5)
-    
+
+
 if __name__ == '__main__':
     main()

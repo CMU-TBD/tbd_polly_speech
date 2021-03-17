@@ -14,6 +14,7 @@ def speak(polly_client, text, voice_id="Joanna"):
     goal.voice_id = voice_id
     polly_client.send_goal(goal)
 
+
 def main():
     rospy.loginfo("start")
     polly_client = actionlib.SimpleActionClient("speak", pollySpeechAction)
@@ -35,8 +36,8 @@ def main():
     polly_client.wait_for_result()
     rospy.sleep(5)
 
+
 if __name__ == '__main__':
     rospy.init_node("polly_node_test")
     rospy.loginfo("start")
     main()
-    
