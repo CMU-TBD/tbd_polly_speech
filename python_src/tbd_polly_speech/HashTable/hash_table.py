@@ -4,6 +4,7 @@ import sys
 import rospkg
 import os
 import yaml
+import hashlib
 
 # class for key tuples to .txt file masterfile
 
@@ -21,13 +22,11 @@ class Item:
 
 class HashTable:
 
-    _table_size: int  # Length of the hash.
     _main_index_path: str  # Path to the main index.
     _index_obj: dict  # The local copy of the index.
 
-    def __init__(self, size, lib_directory):
+    def __init__(self, lib_directory):
 
-        self._table_size = size
         self._main_index_path = os.path.join(lib_directory, 'mainIndex.yaml')
 
         # try to load the index, if not exist, create one
@@ -41,7 +40,7 @@ class HashTable:
                 yaml.dump(self._index_obj, f)
 
     def hashing(self, item: Item) -> str:
-        return hash(item.speaker + item.text) % self._table_size
+        return hashlib.md5((item.speaker + item.text).encode('utf-8')).hexdigest()
 
     def find(self, item: Item) -> str:
         hash_value = self.hashing(item)

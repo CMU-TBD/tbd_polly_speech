@@ -1,0 +1,4 @@
+<launch>
+  <param name="test_module" value="$(find tbd_polly_speech)/python_src"/>
+  <test test-name="test_nodes" pkg="ros_pytest" type="ros_pytest_runner" />
+</launch>

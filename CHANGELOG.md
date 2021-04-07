@@ -1,6 +1,10 @@
 
 # Changelog
 
+## [1.2.1] - 2021-04-07
+- **[Fixed]** bug where hashes were refreshed every session. Use `hashlib` now.
+- **[Added]** some 
+
 ## [1.2.0] - 2021-03-17
 - **[Changed]** reformatting of files
 - **[Changed]** renamed masterfile to hash_table and change it to use yaml instead of pure txt file.

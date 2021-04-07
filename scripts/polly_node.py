@@ -14,7 +14,7 @@ from contextlib import closing
 import struct
 import rospkg
 import os
-from hash_table import Item, HashTable
+from tbd_polly_speech.HashTable import Item, HashTable
 import wave
 
 
@@ -36,7 +36,7 @@ class PollyAudioLibrary(object):
         if not os.path.exists(self._lib_directory):
             os.makedirs(self._lib_directory)
 
-        self._h = HashTable(10 ** 32, self._lib_directory)
+        self._h = HashTable(self._lib_directory)
 
     def save_text(self, text, voice_id, data):
         key = Item(voice_id, text)

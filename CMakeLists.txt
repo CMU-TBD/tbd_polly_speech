@@ -195,5 +195,7 @@ include_directories(
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
+  find_package(ros_pytest REQUIRED)
   add_rostest(test/test_node_interface.test)
+  add_rostest(test/libtest.test)
 endif()
