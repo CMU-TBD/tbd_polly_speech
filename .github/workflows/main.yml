@@ -58,6 +58,7 @@ jobs:
       - name: Check Catkin Result
         run: |
           cd ros_ws
-          catkin_test_results
+          source devel/setup.bash
+          catkin_test_results build/test_results
 
       
