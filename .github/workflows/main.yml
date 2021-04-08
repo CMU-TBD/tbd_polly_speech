@@ -34,6 +34,10 @@ jobs:
           path: ros_ws/src/tbd_polly_speech
       - uses: actions/checkout@v2
         with:
+          repository: cmu-tbd/tbd_audio_common
+          path: ros_ws/src/tbd_audio_common
+      - uses: actions/checkout@v2
+        with:
           repository: cmu-tbd/tbd_ros_msgs
           path: ros_ws/src/tbd_ros_msgs
       - name: Install Dependencies
